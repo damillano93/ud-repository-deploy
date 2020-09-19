@@ -1,0 +1,44 @@
+version: '3'
+networks:
+  udrepository:
+
+services:
+
+    traefik-ud-repository:
+        container_name: traefik-ud-repository
+        image: traefik:v2.0
+        command:
+            - "--api.insecure=true"
+            - "--providers.docker=true"
+            - "--entryPoints.web.address=:80"
+            - "--entryPoints.websecure.address=:443"
+            - "--providers.docker.exposedbydefault=false"
+        #    - "--certificatesResolvers.le.acme.email=mail@gmail.com"
+        #    - "--certificatesResolvers.le.acme.storage=acme.json"
+        #    - "--certificatesResolvers.le.acme.tlsChallenge=true"
+        #    - "--certificatesResolvers.le.acme.httpChallenge=true"
+        #    - "--certificatesResolvers.le.acme.httpChallenge.entryPoint=web"
+        #    - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+        restart: always
+        ports:
+            - 80:80
+            - 443:443
+            - 8090:8080
+        networks:
+            - udrepository
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./acme.json:/acme.json
+            - "./letsencrypt:/letsencrypt"
+        labels:
+
+            # Redirect all HTTP to HTTPS permanently
+            - traefik.http.routers.http_catchall.rule=HostRegexp(`{any:.+}`)
+            - traefik.http.routers.http_catchall.entrypoints=web
+          #  - traefik.http.routers.http_catchall.middlewares=https_redirect
+          #  - traefik.http.middlewares.https_redirect.redirectscheme.scheme=https
+          #  - traefik.http.middlewares.https_redirect.redirectscheme.permanent=true
+
+networks:
+    udrepository:
+        external: true

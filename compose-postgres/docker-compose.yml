@@ -1,0 +1,39 @@
+version: '3.5'
+networks:
+  udrepository:
+
+services:
+  postgres-ud-repository:
+    container_name: postgres-ud-repository
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
+    volumes:
+       - postgres-ud:/data/postgres-ud
+    networks:
+      - udrepository
+    restart: unless-stopped
+  
+  pgadmin-ud-repository:
+    container_name: pgadmin-ud-repository
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    volumes:
+       - pgadmin-ud:/root/.pgadmin-ud
+    ports:
+      - "${PGADMIN_PORT:-5555}:80"
+    networks:
+      - udrepository
+    restart: unless-stopped
+
+networks:
+  udrepository:
+    external: true
+
+volumes:
+    postgres-ud:
+    pgadmin-ud:
